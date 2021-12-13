@@ -11,7 +11,7 @@ import {
 import { withHtml } from "./withHtml";
 import { handleHotkeys } from "./helpers";
 
-import { Editable, withReact, Slate, ReactEditor } from "slate-react";
+import { Editable, withReact, Slate } from "slate-react";
 import { EditorToolbar } from "./EditorToolbar";
 import { CustomElement } from "./CustomElement";
 import { CustomLeaf, CustomText } from "./CustomLeaf";
@@ -20,7 +20,7 @@ import { CustomLeaf, CustomText } from "./CustomLeaf";
 // https://docs.slatejs.org/concepts/12-typescript
 declare module "slate" {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & ReactEditorExtended & HistoryEditor;
+    Editor: BaseEditor & ReactEditorExtended & HistoryEditor;
     Element: CustomElement;
     Text: CustomText;
   }
