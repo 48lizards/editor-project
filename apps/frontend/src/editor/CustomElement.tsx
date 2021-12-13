@@ -1,6 +1,6 @@
 import React from "react";
 import { BaseElement } from "slate";
-import { RenderElementProps } from "slate-react";
+import { RenderElementProps, useSlateStatic } from "slate-react";
 
 export enum CustomElementType {
   blockQuote = "block-quote",
@@ -24,6 +24,7 @@ export const CustomElement: React.FC<RenderElementProps> = ({
   children,
   element,
 }) => {
+  const editor = useSlateStatic();
   switch (element.type) {
     case CustomElementType.blockQuote:
       return <blockquote {...attributes}>{children}</blockquote>;
@@ -38,6 +39,7 @@ export const CustomElement: React.FC<RenderElementProps> = ({
     case CustomElementType.numberedList:
       return <ol {...attributes}>{children}</ol>;
     case CustomElementType.link:
+      return editor.linkElementType({ attributes, children, element });
       return (
         <a
           href={element.url}

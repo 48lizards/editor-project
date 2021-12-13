@@ -3,6 +3,11 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { createEditor, Descendant, BaseEditor } from "slate";
 import { withHistory, HistoryEditor } from "slate-history";
+import {
+  onKeyDown as linkifyOnKeyDown,
+  withLinkify,
+  ReactEditorExtended,
+} from "@mercuriya/slate-linkify";
 import { withHtml } from "./withHtml";
 import { handleHotkeys } from "./helpers";
 
@@ -15,7 +20,7 @@ import { CustomLeaf, CustomText } from "./CustomLeaf";
 // https://docs.slatejs.org/concepts/12-typescript
 declare module "slate" {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor;
+    Editor: BaseEditor & ReactEditor & ReactEditorExtended & HistoryEditor;
     Element: CustomElement;
     Text: CustomText;
   }
@@ -39,9 +44,13 @@ export const Editor: React.FC<EditorProps> = ({
   );
   const renderLeaf = useCallback((props) => <CustomLeaf {...props} />, []);
   const editor = useMemo(
-    () => withHtml(withReact(withHistory(createEditor()))),
+    () => withHtml(withReact(withHistory(withLinkify(createEditor())))),
     []
   );
+  const onKeyDown = useCallback(function handleKeyDown(event) {
+    linkifyOnKeyDown(event, editor);
+    handleHotkeys(editor)(event);
+  }, []);
 
   return (
     <Slate
@@ -57,7 +66,7 @@ export const Editor: React.FC<EditorProps> = ({
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         placeholder={placeholder}
-        onKeyDown={handleHotkeys(editor)}
+        onKeyDown={onKeyDown}
         // The dev server injects extra values to the editr and the console complains
         // so we override them here to remove the message
         autoCapitalize="false"
