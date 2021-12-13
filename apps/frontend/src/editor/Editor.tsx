@@ -82,11 +82,12 @@ export const Editor: React.FC<EditorProps> = ({
     provider.on("sync", (isSynced: boolean) => {
       console.log({ isSynced });
     });
-    // provider.connect();
+    console.log("effect running");
+    provider.connect();
 
-    // return () => {
-    //   provider.disconnect();
-    // };
+    return () => {
+      provider.disconnect();
+    };
   }, [provider]);
 
   return (
