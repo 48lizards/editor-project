@@ -39,11 +39,11 @@ const noteHandler: WebsocketRequestHandler = (ws, req) => {
     console.log({ msg })
     const doc = db.doc(`notes/${req.params.id}`)
     if (msg) {
-      const note = {
-        id: req.params.id,
-        ...JSON.parse(msg.toString())
-      }
-      doc.set(note)
+      // const note = {
+      //   id: req.params.id,
+      //   ...JSON.parse(msg.toString())
+      // }
+      // doc.set(note)
     }
     const docSnapshot = await doc.get()
     return ws.send(JSON.stringify(docSnapshot.data()))

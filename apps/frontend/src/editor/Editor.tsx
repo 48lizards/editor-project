@@ -53,7 +53,7 @@ export const Editor: React.FC<EditorProps> = ({
     const doc = new Y.Doc();
     const sharedType = doc.getArray<SyncElement>("content");
     const provider = new WebsocketProvider(
-      "ws://localhost:3001/notes",
+      "ws://localhost:3001/api/notes",
       "n1",
       doc,
       { connect: false }
@@ -82,7 +82,7 @@ export const Editor: React.FC<EditorProps> = ({
     provider.on("sync", (isSynced: boolean) => {
       console.log({ isSynced });
     });
-    console.log("effect running");
+
     provider.connect();
 
     return () => {
