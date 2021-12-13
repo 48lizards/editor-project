@@ -1,6 +1,7 @@
 import express, { RequestHandler, Response } from 'express'
 import { WebsocketRequestHandler } from 'express-ws'
 import { Descendant } from 'slate'
+import * as Y from 'yjs'
 import db from '../firebase'
 
 // Patch `express.Router` to support `.ws()` without needing to pass around a `ws`-ified app.
@@ -38,15 +39,20 @@ const noteHandler: WebsocketRequestHandler = (ws, req) => {
   ws.on('message', async (msg) => {
     console.log({ msg })
     const doc = db.doc(`notes/${req.params.id}`)
-    if (msg) {
-      // const note = {
-      //   id: req.params.id,
-      //   ...JSON.parse(msg.toString())
-      // }
-      // doc.set(note)
-    }
     const docSnapshot = await doc.get()
+    const docData = docSnapshot.data()
+    if (docData) {
+      const yDoc = new Y.Doc()
+      yDoc.getArray('content').insert(0, docData.content)
+    }
     return ws.send(JSON.stringify(docSnapshot.data()))
+    // if (msg) {
+    // const note = {
+    //   id: req.params.id,
+    //   ...JSON.parse(msg.toString())
+    // }
+    // doc.set(note)
+    // }
   })
 }
 
