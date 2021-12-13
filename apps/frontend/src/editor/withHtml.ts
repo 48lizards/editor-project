@@ -1,4 +1,4 @@
-import { Transforms, CustomTypes, BaseEditor } from 'slate'
+import { Transforms, CustomTypes } from 'slate'
 import { jsx } from "slate-hyperscript"
 import { CustomElement } from "./CustomElement"
 
@@ -76,7 +76,7 @@ const deserialize = (el: Node): any => {
     return children
 }
 
-export const withHtml = (editor: CustomTypes["Editor"]): CustomTypes["Editor"] => {
+export const withHtml = (editor: CustomTypes['Editor']): CustomTypes['Editor'] => {
     const { insertData, isInline } = editor
 
     editor.isInline = (element: CustomElement) => {

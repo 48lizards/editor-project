@@ -3,6 +3,8 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { createEditor, Descendant, BaseEditor } from "slate";
 import { withHistory, HistoryEditor } from "slate-history";
+import { withYjs, YjsEditor } from "@slate-yjs/core";
+import * as Y from "yjs";
 import {
   onKeyDown as linkifyOnKeyDown,
   withLinkify,
@@ -20,7 +22,7 @@ import { CustomLeaf, CustomText } from "./CustomLeaf";
 // https://docs.slatejs.org/concepts/12-typescript
 declare module "slate" {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditorExtended & HistoryEditor;
+    Editor: BaseEditor & ReactEditorExtended & HistoryEditor & YjsEditor;
     Element: CustomElement;
     Text: CustomText;
   }
@@ -43,8 +45,16 @@ export const Editor: React.FC<EditorProps> = ({
     []
   );
   const renderLeaf = useCallback((props) => <CustomLeaf {...props} />, []);
+  const sharedType = useMemo(() => {
+    const doc = new Y.Doc();
+    return doc.getArray<Y.Map<any>>("content");
+  }, []);
   const editor = useMemo(
-    () => withHtml(withReact(withHistory(withLinkify(createEditor())))),
+    () =>
+      withYjs(
+        withHtml(withReact(withHistory(withLinkify(createEditor())))),
+        sharedType
+      ),
     []
   );
   const onKeyDown = useCallback(function handleKeyDown(event) {
