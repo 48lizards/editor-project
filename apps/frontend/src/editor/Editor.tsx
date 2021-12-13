@@ -1,10 +1,11 @@
 // @refresh reset // Fixes hot refresh errors in development https://github.com/ianstormtaylor/slate/issues/3477
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createEditor, Descendant, BaseEditor } from "slate";
 import { withHistory, HistoryEditor } from "slate-history";
-import { withYjs, YjsEditor } from "@slate-yjs/core";
+import { withYjs, YjsEditor, SyncElement } from "slate-yjs";
 import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 import {
   onKeyDown as linkifyOnKeyDown,
   withLinkify,
@@ -40,18 +41,30 @@ export const Editor: React.FC<EditorProps> = ({
   onChange,
 }) => {
   const [value, setValue] = useState<Descendant[]>(initialValue);
+
   const renderElement = useCallback(
     (props) => <CustomElement {...props} />,
     []
   );
   const renderLeaf = useCallback((props) => <CustomLeaf {...props} />, []);
-  const sharedType = useMemo(() => {
+
+  const id = "n1";
+  const [sharedType, provider] = useMemo(() => {
     const doc = new Y.Doc();
-    return doc.getArray<Y.Map<any>>("content");
-  }, []);
+    const sharedType = doc.getArray<SyncElement>("content");
+    const provider = new WebsocketProvider(
+      "ws://localhost:3001/notes",
+      "n1",
+      doc,
+      { connect: false }
+    );
+    return [sharedType, provider];
+  }, [id]);
+
   const editor = useMemo(
     () =>
       withYjs(
+        // @ts-expect-error todo
         withHtml(withReact(withHistory(withLinkify(createEditor())))),
         sharedType
       ),
@@ -62,13 +75,27 @@ export const Editor: React.FC<EditorProps> = ({
     handleHotkeys(editor)(event);
   }, []);
 
+  useEffect(() => {
+    provider.on("status", ({ status }: { status: string }) => {
+      console.log({ status });
+    });
+    provider.on("sync", (isSynced: boolean) => {
+      console.log({ isSynced });
+    });
+    // provider.connect();
+
+    // return () => {
+    //   provider.disconnect();
+    // };
+  }, [provider]);
+
   return (
     <Slate
       editor={editor}
       value={value}
-      onChange={(value) => {
-        setValue(value);
-        onChange(value);
+      onChange={(val) => {
+        setValue(val);
+        onChange(val);
       }}
     >
       <EditorToolbar />
